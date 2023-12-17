@@ -1,0 +1,9 @@
+.idea
+.vscode
+
+examples
+
+*.exe
+*.so
+*.dll
+*.pyd
