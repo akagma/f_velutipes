@@ -8,28 +8,33 @@ import bumpy
 import types
 
 
-var defaultFont = readFont("examples/data/Roboto-Regular_1.ttf")
-defaultFont.size = 24
-defaultFont.paint = parseHtmlColor("#0d0015")
-
 const
+  gofun_iro* = "#fffffc"
+  nyu_haku_syoku* = "#f3f3f3"
+  usu_nibi* = "#adadad"
+
+  shikkoku* = "#0d0015"
+  kuro* = "#2b2b2b"
+  yokan_iro* = "#383c3c"
+  nibi_iro* = "#727171"
+
   defaultGap = 8.0
   fgCoeff = 0.6
-  defaultBackgroundColor = 
+  defaultBackgroundColor* = 
     WidgetColor(
-      enabled: parseHtmlColor("#e6b422"),
-      disabled: parseHtmlColor("#666666"),
-      hover: parseHtmlColor("#f6c432")
+      enabled: parseHtmlColor(kuro),
+      disabled: parseHtmlColor(nibi_iro),
+      hover: parseHtmlColor(yokan_iro)
     )
-  defaultForegroundColor = 
+  defaultForegroundColor* = 
     WidgetColor(
-      enabled: parseHtmlColor("#a432f6"),
-      disabled: parseHtmlColor("#767676"),
-      hover: parseHtmlColor("#d442ff")
+      enabled: parseHtmlColor(gofun_iro),
+      disabled: parseHtmlColor(usu_nibi),
+      hover: parseHtmlColor(nyu_haku_syoku)
     )
-  defaultCornerRadius =
+  defaultCornerRadius* =
     CornerRadius(leftTop: 8, rightTop: 8, leftBottom: 8, rightBottom: 8)
-  defaultBorderColor = parseHtmlColor("#0d0015")
+  defaultBorderColor* = parseHtmlColor(shikkoku)
   defaultPadding = Padding(top: 8, right: 8, bottom: 8, left: 8)
   defaultMargin = Margin(top: 8, right: 8, bottom: 8, left: 8)
 
@@ -45,6 +50,11 @@ const
   defaultTooltipMargin = Margin(top: 30, right: 0, bottom: 12, left: 12)
 
   defaultCursorWait = 30
+
+
+var defaultFont = readFont("examples/data/Roboto-Regular_1.ttf")
+defaultFont.size = 24
+defaultFont.paint = parseHtmlColor(gofun_iro)
 
 
 proc getMarginLeft(self: FlammulinaVelutipesWidget): float32 =
@@ -254,7 +264,7 @@ func getMinSize(text: string, font: Font, size: Vec2, padding: Padding): Vec2 =
 proc tooltip*(
   text: string,
   font: Font = defaultFont,
-  color: Color = parseHtmlColor("#666666"),
+  color: Color = parseHtmlColor(yokan_iro),
   size: Vec2 = vec2(0, 0),
   padding: Padding = defaultTooltipPadding,
   margin: Margin = defaultTooltipMargin,
@@ -473,7 +483,7 @@ proc lineEdit*(
       currentIndex: 0,
       cursor: TextCursor(
         shape: rect(0, 0, 0.5 * font.size, font.size),
-        color: parseHtmlColor("#a432f6")
+        color: parseHtmlColor(gofun_iro)
       ),
       cursorVisible: false,
       cursorWait: 0,
