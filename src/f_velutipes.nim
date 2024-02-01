@@ -4,9 +4,17 @@ import boxy
 import bumpy
 import windy
 
-import types
-import widgets
-import window_manager
+import f_velutipes/types
+import f_velutipes/widgets
+import f_velutipes/window_manager
+
+
+export boxy
+export windy
+
+export types
+export widgets
+export window_manager
 
 
 func getTranslateX(

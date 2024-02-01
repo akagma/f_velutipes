@@ -6,6 +6,7 @@ description   = "pure Nim GUI library"
 license       = "MIT"
 srcDir        = "src"
 bin           = @["f_velutipes"]
+installExt    = @["nim"]
 
 
 # Dependencies
