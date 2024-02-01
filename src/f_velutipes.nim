@@ -4,9 +4,9 @@ import boxy
 import bumpy
 import windy
 
-import f_velutipes/types
-import f_velutipes/widgets
-import f_velutipes/window_manager
+import f_velutipespkg/types
+import f_velutipespkg/widgets
+import f_velutipespkg/window_manager
 
 
 export boxy
@@ -17,7 +17,7 @@ export widgets
 export window_manager
 
 
-func getTranslateX(
+func getTranslateX*(
   horizontalAlignment: HorizontalAlignment,
   padding: Padding
 ): float32 =
@@ -30,7 +30,7 @@ func getTranslateX(
     -padding.right
 
 
-func getTranslateY(
+func getTranslateY*(
   verticalAlignment: VerticalAlignment,
   padding: Padding
 ): float32 =
@@ -43,7 +43,7 @@ func getTranslateY(
     -padding.bottom
 
 
-func getTranslate(
+func getTranslate*(
   horizontalAlignment: HorizontalAlignment,
   verticalAlignment: VerticalAlignment,
   padding: Padding
@@ -54,580 +54,506 @@ func getTranslate(
   )
 
 
-proc addImage(bxy: Boxy, label: Label) =
-  let textImage = newImage(label.shape.w.int, label.shape.h.int)
-  textImage.fillText(
-    label.font.typeset(
-      label.text,
-      vec2(label.shape.w, label.shape.h),
-      label.horizontalAlignment,
-      label.verticalAlignment
-    ),
-    translate(
-      getTranslate(
+template addImage*(windowManager: untyped): untyped =
+  proc addImage(bxy: Boxy, label: Label) =
+    let textImage = newImage(label.shape.w.int, label.shape.h.int)
+    textImage.fillText(
+      label.font.typeset(
+        label.text,
+        vec2(label.shape.w, label.shape.h),
         label.horizontalAlignment,
-        label.verticalAlignment,
-        label.padding
-      )
-    )
-  )
-
-  bxy.addImage(label.name, textImage)
-
-  if label.tooltip.isSome():
-    let
-      tooltip = label.tooltip.get()
-      tooltipImage =
-        newImage(
-          tooltip.size.x.int,
-          tooltip.size.y.int
-        )
-
-    tooltipImage.fillText(
-      tooltip.font.typeset(
-        tooltip.text,
-        tooltip.size,
-        tooltip.horizontalAlignment,
-        tooltip.verticalAlignment
-      ),
-      translate(getTranslate(
-        tooltip.horizontalAlignment,
-        tooltip.verticalAlignment,
-        tooltip.padding
-      ))
-    )
-    bxy.addImage(label.name & "_tooltip", tooltipImage)
-
-
-proc addImage(bxy: Boxy, lineEdit: LineEdit) =
-  let textImage = newImage(lineEdit.shape.w.int, lineEdit.shape.h.int)
-  textImage.fillText(
-    lineEdit.font.typeset(
-      lineEdit.text,
-      vec2(lineEdit.shape.w, lineEdit.shape.h),
-      lineEdit.horizontalAlignment,
-      lineEdit.verticalAlignment
-    ),
-    translate(
-      getTranslate(
-        lineEdit.horizontalAlignment,
-        lineEdit.verticalAlignment,
-        lineEdit.padding
-      )
-    )
-  )
-
-  bxy.addImage(lineEdit.name, textImage)
-
-  if lineEdit.tooltip.isSome():
-    let
-      tooltip = lineEdit.tooltip.get()
-      tooltipImage =
-        newImage(
-          tooltip.size.x.int,
-          tooltip.size.y.int
-        )
-
-    tooltipImage.fillText(
-      tooltip.font.typeset(
-        tooltip.text,
-        tooltip.size,
-        tooltip.horizontalAlignment,
-        tooltip.verticalAlignment
-      ),
-      translate(getTranslate(
-        tooltip.horizontalAlignment,
-        tooltip.verticalAlignment,
-        tooltip.padding
-      ))
-    )
-    bxy.addImage(lineEdit.name & "_tooltip", tooltipImage)
-
-
-proc addImage(bxy: Boxy, button: RadioButton) =
-  let
-    bgShapeImage =
-      newImage(button.boundaryBox.h.int, button.boundaryBox.h.int)
-    bgCtx = newContext(bgShapeImage)
-
-  if button.bgcolor.isSome():
-    bgCtx.beginPath()
-
-    bgCtx.fillStyle.color = parseHtmlColor("#ffffff")
-
-    bgCtx.fillCircle(
-      circle(
-        vec2(button.bgshape.radius, button.bgshape.radius),
-        button.bgshape.radius
-      )
-    )
-    bgCtx.closePath()
-    bxy.addImage(button.name & "_bg_shape", bgShapeImage)
-
-  let
-    fgShapeImage =
-      newImage(
-        button.boundaryBox.h.int,
-        button.boundaryBox.h.int
-      )
-    fgCtx = newContext(fgShapeImage)
-
-  if button.fgcolor.isSome():
-    fgCtx.beginPath()
-
-    fgCtx.fillStyle.color = parseHtmlColor("#ffffff")
-
-    fgCtx.fillCircle(
-      circle(
-        vec2(button.bgshape.radius, button.bgshape.radius),
-        button.fgshape.radius
-      )
-    )
-    fgCtx.closePath()
-    bxy.addImage(button.name & "_fg_shape", fgShapeImage)
-
-  let
-    textWidth = button.boundaryBox.w
-    textHeight = button.boundaryBox.h
-    textImage = newImage(textWidth.int, textHeight.int)
-
-  textImage.fillText(
-    button.font.typeset(
-      button.text,
-      vec2(textwidth, textheight),
-      HorizontalAlignment.LeftAlign,
-      Verticalalignment.MiddleAlign
-    ),
-    translate(
-      vec2(
-        button.bgshape.radius * 2 + button.gap,
-        0
-      )
-    )
-  )
-  bxy.addImage(button.name & "_text", textImage)
-
-  if button.tooltip.isSome():
-    let
-      tooltip = button.tooltip.get()
-      tooltipImage =
-        newImage(
-          tooltip.size.x.int,
-          tooltip.size.y.int
-        )
-
-    tooltipImage.fillText(
-      tooltip.font.typeset(
-        tooltip.text,
-        tooltip.size,
-        tooltip.horizontalAlignment,
-        tooltip.verticalAlignment
+        label.verticalAlignment
       ),
       translate(
         getTranslate(
-          tooltip.horizontalAlignment,
-          tooltip.verticalAlignment,
-          tooltip.padding
+          label.horizontalAlignment,
+          label.verticalAlignment,
+          label.padding
         )
       )
     )
-    bxy.addImage(button.name & "_tooltip", tooltipImage)
+
+    bxy.addImage(label.name, textImage)
+
+    if label.tooltip.isSome():
+      let
+        tooltip = label.tooltip.get()
+        tooltipImage =
+          newImage(
+            tooltip.size.x.int,
+            tooltip.size.y.int
+          )
+
+      tooltipImage.fillText(
+        tooltip.font.typeset(
+          tooltip.text,
+          tooltip.size,
+          tooltip.horizontalAlignment,
+          tooltip.verticalAlignment
+        ),
+        translate(getTranslate(
+          tooltip.horizontalAlignment,
+          tooltip.verticalAlignment,
+          tooltip.padding
+        ))
+      )
+      bxy.addImage(label.name & "_tooltip", tooltipImage)
 
 
-proc addImage(bxy: Boxy, button: PushButton) =
-  case button.shape.kind
-  of pbskCircle:
+  proc addImage(bxy: Boxy, lineEdit: LineEdit) =
+    let textImage = newImage(lineEdit.shape.w.int, lineEdit.shape.h.int)
+    textImage.fillText(
+      lineEdit.font.typeset(
+        lineEdit.text,
+        vec2(lineEdit.shape.w, lineEdit.shape.h),
+        lineEdit.horizontalAlignment,
+        lineEdit.verticalAlignment
+      ),
+      translate(
+        getTranslate(
+          lineEdit.horizontalAlignment,
+          lineEdit.verticalAlignment,
+          lineEdit.padding
+        )
+      )
+    )
+
+    bxy.addImage(lineEdit.name, textImage)
+
+    if lineEdit.tooltip.isSome():
+      let
+        tooltip = lineEdit.tooltip.get()
+        tooltipImage =
+          newImage(
+            tooltip.size.x.int,
+            tooltip.size.y.int
+          )
+
+      tooltipImage.fillText(
+        tooltip.font.typeset(
+          tooltip.text,
+          tooltip.size,
+          tooltip.horizontalAlignment,
+          tooltip.verticalAlignment
+        ),
+        translate(getTranslate(
+          tooltip.horizontalAlignment,
+          tooltip.verticalAlignment,
+          tooltip.padding
+        ))
+      )
+      bxy.addImage(lineEdit.name & "_tooltip", tooltipImage)
+
+
+  proc addImage(bxy: Boxy, button: RadioButton) =
     let
-      shapeImage = newImage(button.boundaryBox.w.int, button.boundaryBox.h.int)
-      ctx = newContext(shapeImage)
+      bgShapeImage =
+        newImage(button.boundaryBox.h.int, button.boundaryBox.h.int)
+      bgCtx = newContext(bgShapeImage)
 
     if button.bgcolor.isSome():
-      ctx.fillStyle.color = parseHtmlColor("#ffffff")
+      bgCtx.beginPath()
 
-      ctx.beginPath()
-      ctx.fillCircle(circle(
-        vec2(button.shape.circle.radius, button.shape.circle.radius),
-        button.shape.circle.radius
-      ))
-      ctx.closePath()
-      bxy.addImage(button.name, shapeImage)
+      bgCtx.fillStyle.color = parseHtmlColor("#ffffff")
 
-  of pbskRect:
-    if button.cornerRadius.isSome():
-      let cornerRadius = button.cornerRadius.get()
+      bgCtx.fillCircle(
+        circle(
+          vec2(button.bgshape.radius, button.bgshape.radius),
+          button.bgshape.radius
+        )
+      )
+      bgCtx.closePath()
+      bxy.addImage(button.name & "_bg_shape", bgShapeImage)
+
+    let
+      fgShapeImage =
+        newImage(
+          button.boundaryBox.h.int,
+          button.boundaryBox.h.int
+        )
+      fgCtx = newContext(fgShapeImage)
+
+    if button.fgcolor.isSome():
+      fgCtx.beginPath()
+
+      fgCtx.fillStyle.color = parseHtmlColor("#ffffff")
+
+      fgCtx.fillCircle(
+        circle(
+          vec2(button.bgshape.radius, button.bgshape.radius),
+          button.fgshape.radius
+        )
+      )
+      fgCtx.closePath()
+      bxy.addImage(button.name & "_fg_shape", fgShapeImage)
+
+    let
+      textWidth = button.boundaryBox.w
+      textHeight = button.boundaryBox.h
+      textImage = newImage(textWidth.int, textHeight.int)
+
+    textImage.fillText(
+      button.font.typeset(
+        button.text,
+        vec2(textwidth, textheight),
+        HorizontalAlignment.LeftAlign,
+        Verticalalignment.MiddleAlign
+      ),
+      translate(
+        vec2(
+          button.bgshape.radius * 2 + button.gap,
+          0
+        )
+      )
+    )
+    bxy.addImage(button.name & "_text", textImage)
+
+    if button.tooltip.isSome():
+      let
+        tooltip = button.tooltip.get()
+        tooltipImage =
+          newImage(
+            tooltip.size.x.int,
+            tooltip.size.y.int
+          )
+
+      tooltipImage.fillText(
+        tooltip.font.typeset(
+          tooltip.text,
+          tooltip.size,
+          tooltip.horizontalAlignment,
+          tooltip.verticalAlignment
+        ),
+        translate(
+          getTranslate(
+            tooltip.horizontalAlignment,
+            tooltip.verticalAlignment,
+            tooltip.padding
+          )
+        )
+      )
+      bxy.addImage(button.name & "_tooltip", tooltipImage)
+
+
+  proc addImage(bxy: Boxy, button: PushButton) =
+    case button.shape.kind
+    of pbskCircle:
+      let
+        shapeImage = newImage(button.boundaryBox.w.int, button.boundaryBox.h.int)
+        ctx = newContext(shapeImage)
 
       if button.bgcolor.isSome():
-        let
-          shapeImage = newImage(button.boundaryBox.w.int, button.boundaryBox.h.int)
-          ctx = newContext(shapeImage)
-        
-        ctx.fillStyle.color =
-          parseHtmlColor("#ffffff")
-        
+        ctx.fillStyle.color = parseHtmlColor("#ffffff")
+
         ctx.beginPath()
-        ctx.fillRoundedRect(
-          rect(0, 0, button.boundaryBox.w, button.boundaryBox.h),
-          cornerRadius.leftTop,
-          cornerRadius.rightTop,
-          cornerRadius.rightBottom,
-          cornerRadius.leftBottom
-        )
+        ctx.fillCircle(circle(
+          vec2(button.shape.circle.radius, button.shape.circle.radius),
+          button.shape.circle.radius
+        ))
         ctx.closePath()
         bxy.addImage(button.name, shapeImage)
 
-  let textImage = newImage(button.boundaryBox.w.int, button.boundaryBox.h.int)
-  textImage.fillText(
-    button.font.typeset(
-      button.text,
-      vec2(button.boundaryBox.w, button.boundaryBox.h),
-      CenterAlign,
-      MiddleAlign
-    ),
-    translate(vec2(0, 0))
-  )
+    of pbskRect:
+      if button.cornerRadius.isSome():
+        let cornerRadius = button.cornerRadius.get()
 
-  bxy.addImage(button.name & "_text", textImage)
+        if button.bgcolor.isSome():
+          let
+            shapeImage = newImage(button.boundaryBox.w.int, button.boundaryBox.h.int)
+            ctx = newContext(shapeImage)
+          
+          ctx.fillStyle.color =
+            parseHtmlColor("#ffffff")
+          
+          ctx.beginPath()
+          ctx.fillRoundedRect(
+            rect(0, 0, button.boundaryBox.w, button.boundaryBox.h),
+            cornerRadius.leftTop,
+            cornerRadius.rightTop,
+            cornerRadius.rightBottom,
+            cornerRadius.leftBottom
+          )
+          ctx.closePath()
+          bxy.addImage(button.name, shapeImage)
 
-  if button.tooltip.isSome():
-    let
-      tooltip = button.tooltip.get()
-      tooltipImage = newImage(
-        tooltip.size.x.int,
-        tooltip.size.y.int
-      )
-
-    tooltipImage.fillText(
-      tooltip.font.typeset(
-        tooltip.text,
-        tooltip.size,
-        tooltip.horizontalAlignment,
-        tooltip.verticalAlignment
+    let textImage = newImage(button.boundaryBox.w.int, button.boundaryBox.h.int)
+    textImage.fillText(
+      button.font.typeset(
+        button.text,
+        vec2(button.boundaryBox.w, button.boundaryBox.h),
+        CenterAlign,
+        MiddleAlign
       ),
-      translate(getTranslate(
-        tooltip.horizontalAlignment,
-        tooltip.verticalAlignment,
-        tooltip.padding
-      ))
+      translate(vec2(0, 0))
     )
-    bxy.addImage(button.name & "_tooltip", tooltipImage)
 
+    bxy.addImage(button.name & "_text", textImage)
 
-proc addImage(bxy: Boxy, button: CheckButton) =
-  let
-    bgShapeImage =
-      newImage(button.bgshape.w.int, button.bgshape.h.int)
-    bgCtx = newContext(bgShapeImage)
-
-  if button.bgcolor.isSome():
-    bgCtx.beginPath()
-
-    bgCtx.fillStyle.color = parseHtmlColor("#ffffff")
-
-    bgCtx.fillRect(
-      rect(
-        0,
-        0,
-        button.bgshape.w,
-        button.bgshape.h
-      )
-    )
-    bgCtx.closePath()
-    bxy.addImage(button.name & "_bg_shape", bgShapeImage)
-
-  let
-    fgShapeImage =
-      newImage(
-        button.bgshape.w.int,
-        button.bgshape.h.int
-      )
-    fgCtx = newContext(fgShapeImage)
-
-  if button.fgcolor.isSome():
-    fgCtx.beginPath()
-
-    fgCtx.fillStyle.color = parseHtmlColor("#ffffff")
-
-    fgCtx.fillRect(
-      rect(
-        (button.bgshape.w - button.fgshape.w) / 2,
-        (button.bgshape.h - button.fgshape.h) / 2,
-        button.fgshape.w,
-        button.fgshape.h
-      )
-    )
-    fgCtx.closePath()
-    bxy.addImage(button.name & "_fg_shape", fgShapeImage)
-
-  let
-    textWidth = button.boundaryBox.w
-    textHeight = button.boundaryBox.h
-    textImage = newImage(textWidth.int, textHeight.int)
-
-  textImage.fillText(
-    button.font.typeset(
-      button.text,
-      vec2(textwidth, textheight),
-      HorizontalAlignment.LeftAlign,
-      Verticalalignment.MiddleAlign
-    ),
-    translate(
-      vec2(
-        button.bgshape.w + button.gap,
-        0
-      )
-    )
-  )
-  bxy.addImage(button.name & "_text", textImage)
-
-  if button.tooltip.isSome():
-    let
-      tooltip = button.tooltip.get()
-      tooltipImage =
-        newImage(
+    if button.tooltip.isSome():
+      let
+        tooltip = button.tooltip.get()
+        tooltipImage = newImage(
           tooltip.size.x.int,
           tooltip.size.y.int
         )
 
-    tooltipImage.fillText(
-      tooltip.font.typeset(
-        tooltip.text,
-        tooltip.size,
-        tooltip.horizontalAlignment,
-        tooltip.verticalAlignment
-      ),
-      translate(
-        getTranslate(
+      tooltipImage.fillText(
+        tooltip.font.typeset(
+          tooltip.text,
+          tooltip.size,
+          tooltip.horizontalAlignment,
+          tooltip.verticalAlignment
+        ),
+        translate(getTranslate(
           tooltip.horizontalAlignment,
           tooltip.verticalAlignment,
           tooltip.padding
+        ))
+      )
+      bxy.addImage(button.name & "_tooltip", tooltipImage)
+
+
+  proc addImage(bxy: Boxy, button: CheckButton) =
+    let
+      bgShapeImage =
+        newImage(button.bgshape.w.int, button.bgshape.h.int)
+      bgCtx = newContext(bgShapeImage)
+
+    if button.bgcolor.isSome():
+      bgCtx.beginPath()
+
+      bgCtx.fillStyle.color = parseHtmlColor("#ffffff")
+
+      bgCtx.fillRect(
+        rect(
+          0,
+          0,
+          button.bgshape.w,
+          button.bgshape.h
+        )
+      )
+      bgCtx.closePath()
+      bxy.addImage(button.name & "_bg_shape", bgShapeImage)
+
+    let
+      fgShapeImage =
+        newImage(
+          button.bgshape.w.int,
+          button.bgshape.h.int
+        )
+      fgCtx = newContext(fgShapeImage)
+
+    if button.fgcolor.isSome():
+      fgCtx.beginPath()
+
+      fgCtx.fillStyle.color = parseHtmlColor("#ffffff")
+
+      fgCtx.fillRect(
+        rect(
+          (button.bgshape.w - button.fgshape.w) / 2,
+          (button.bgshape.h - button.fgshape.h) / 2,
+          button.fgshape.w,
+          button.fgshape.h
+        )
+      )
+      fgCtx.closePath()
+      bxy.addImage(button.name & "_fg_shape", fgShapeImage)
+
+    let
+      textWidth = button.boundaryBox.w
+      textHeight = button.boundaryBox.h
+      textImage = newImage(textWidth.int, textHeight.int)
+
+    textImage.fillText(
+      button.font.typeset(
+        button.text,
+        vec2(textwidth, textheight),
+        HorizontalAlignment.LeftAlign,
+        Verticalalignment.MiddleAlign
+      ),
+      translate(
+        vec2(
+          button.bgshape.w + button.gap,
+          0
         )
       )
     )
-    bxy.addImage(button.name & "_tooltip", tooltipImage)
+    bxy.addImage(button.name & "_text", textImage)
+
+    if button.tooltip.isSome():
+      let
+        tooltip = button.tooltip.get()
+        tooltipImage =
+          newImage(
+            tooltip.size.x.int,
+            tooltip.size.y.int
+          )
+
+      tooltipImage.fillText(
+        tooltip.font.typeset(
+          tooltip.text,
+          tooltip.size,
+          tooltip.horizontalAlignment,
+          tooltip.verticalAlignment
+        ),
+        translate(
+          getTranslate(
+            tooltip.horizontalAlignment,
+            tooltip.verticalAlignment,
+            tooltip.padding
+          )
+        )
+      )
+      bxy.addImage(button.name & "_tooltip", tooltipImage)
 
 
-proc addImage(bxy: Boxy, layout: Layout) =
-  let children = layout.children
-  for child in children:
-    case child.kind
+  proc addImage(bxy: Boxy, layout: Layout) =
+    let children = layout.children
+    for child in children:
+      case child.kind
+      of wkLayout:
+        bxy.addImage(child.layout)
+      of wkLabel:
+        bxy.addImage(child.label)
+      of wkLineEdit:
+        bxy.addImage(child.lineEdit)
+      of wkRadioButton:
+        bxy.addImage(child.radioButton)
+      of wkPushButton:
+        bxy.addImage(child.pushButton)
+      of wkCheckButton:
+        bxy.addImage(child.checkButton)
+      of wkSlider:
+        discard
+
+
+  proc addImage(bxy: Boxy, widget: FlammulinaVelutipesWidget) =
+    case widget.kind
     of wkLayout:
-      bxy.addImage(child.layout)
+      bxy.addImage(widget.layout)
     of wkLabel:
-      bxy.addImage(child.label)
+      bxy.addImage(widget.label)
     of wkLineEdit:
-      bxy.addImage(child.lineEdit)
+      bxy.addImage(widget.lineEdit)
     of wkRadioButton:
-      bxy.addImage(child.radioButton)
+      bxy.addImage(widget.radioButton)
     of wkPushButton:
-      bxy.addImage(child.pushButton)
+      bxy.addImage(widget.pushButton)
     of wkCheckButton:
-      bxy.addImage(child.checkButton)
+      bxy.addImage(widget.checkButton)
     of wkSlider:
       discard
 
 
-proc addImage(bxy: Boxy, widget: FlammulinaVelutipesWidget) =
-  case widget.kind
-  of wkLayout:
-    bxy.addImage(widget.layout)
-  of wkLabel:
-    bxy.addImage(widget.label)
-  of wkLineEdit:
-    bxy.addImage(widget.lineEdit)
-  of wkRadioButton:
-    bxy.addImage(widget.radioButton)
-  of wkPushButton:
-    bxy.addImage(widget.pushButton)
-  of wkCheckButton:
-    bxy.addImage(widget.checkButton)
-  of wkSlider:
-    discard
+  # proc addImage*(self: WindowManager) =
+  #   self.boxy.addImage(self.rootWidget)
+
+  windowManager.boxy.addImage(windowManager.rootWidget)
 
 
-proc addImage*(self: WindowManager) =
-  self.boxy.addImage(self.rootWidget)
+template updateImage*(windowManager: untyped): untyped =
+  proc updateImage(bxy: Boxy, lineEdit: LineEdit) =
+    bxy.removeImage(lineEdit.name)
 
-
-proc updateImage(bxy: Boxy, lineEdit: LineEdit) =
-  bxy.removeImage(lineEdit.name)
-
-  let textImage = newImage(lineEdit.shape.w.int, lineEdit.shape.h.int)
-  textImage.fillText(
-    lineEdit.font.typeset(
-      lineEdit.text,
-      vec2(lineEdit.shape.w, lineEdit.shape.h),
-      lineEdit.horizontalAlignment,
-      lineEdit.verticalAlignment
-    ),
-    translate(
-      getTranslate(
+    let textImage = newImage(lineEdit.shape.w.int, lineEdit.shape.h.int)
+    textImage.fillText(
+      lineEdit.font.typeset(
+        lineEdit.text,
+        vec2(lineEdit.shape.w, lineEdit.shape.h),
         lineEdit.horizontalAlignment,
-        lineEdit.verticalAlignment,
-        lineEdit.padding
+        lineEdit.verticalAlignment
+      ),
+      translate(
+        getTranslate(
+          lineEdit.horizontalAlignment,
+          lineEdit.verticalAlignment,
+          lineEdit.padding
+        )
       )
     )
-  )
 
-  bxy.addImage(lineEdit.name, textImage)
+    bxy.addImage(lineEdit.name, textImage)
 
 
-proc updateImage(bxy: Boxy, widget: FlammulinaVelutipesWidget) =
-  if widget.updated():
+  proc updateImage(bxy: Boxy, widget: FlammulinaVelutipesWidget) =
+    if widget.updated():
+      case widget.kind:
+      of wkLineEdit:
+        bxy.updateImage(widget.lineEdit)
+        widget.lineEdit.updated = false
+      else:
+        discard
+    
     case widget.kind:
-    of wkLineEdit:
-      bxy.updateImage(widget.lineEdit)
-      widget.lineEdit.updated = false
+    of wkLayout:
+      for child in widget.layout.children:
+        updateImage(bxy, child)
     else:
       discard
-  
-  case widget.kind:
-  of wkLayout:
-    for child in widget.layout.children:
-      updateImage(bxy, child)
-  else:
-    discard
 
 
-proc updateImage*(self: WindowManager) =
-  self.boxy.updateImage(self.rootWidget)
+  # proc updateImage*(self: WindowManager) =
+  #   self.boxy.updateImage(self.rootWidget)
+
+  windowManager.boxy.updateImage(windowManager.rootWidget)
 
 
-proc draw(bxy: Boxy, label: Label, parentEnabled: bool) =
-  if not label.visible:
-    return
+template display*(windowManager: untyped): untyped =
+  proc draw(bxy: Boxy, label: Label, parentEnabled: bool) =
+    if not label.visible:
+      return
 
-  let enabled = parentEnabled and label.enabled
-  if label.bgcolor.isSome():
-    let
-      bgcolor = label.bgcolor.get()
-      color = 
-        if enabled:
-          if label.hovered:
-            bgcolor.hover
-          else:
-            bgcolor.enabled
-        else: bgcolor.disabled
-    bxy.drawRect(label.shape, color)
-
-  bxy.drawImage(label.name, vec2(label.boundaryBox.x, label.boundaryBox.y))
-
-
-proc draw(bxy: Boxy, lineEdit: LineEdit, parentEnabled: bool) =
-  if not lineEdit.visible:
-    return
-
-  let enabled = parentEnabled and lineEdit.enabled
-  if lineEdit.bgcolor.isSome():
-    let
-      bgcolor = lineEdit.bgcolor.get()
-      color = 
-        if enabled:
-          if lineEdit.hovered:
-            bgcolor.hover
-          else:
-            bgcolor.enabled
-        else: bgcolor.disabled
-    bxy.drawRect(lineEdit.shape, color)
-  
-  if lineEdit.focused:
-    if lineEdit.cursorVisible:
-      bxy.drawRect(lineEdit.cursor.shape, lineEdit.cursor.color)
-
-    lineEdit.cursorWait += 1
-    if lineEdit.cursorWait == lineEdit.cursorWaitMax:
-      lineEdit.cursorWait = 0
-      lineEdit.cursorVisible = not lineEdit.cursorVisible
-
-
-  bxy.drawImage(lineEdit.name, vec2(lineEdit.boundaryBox.x, lineEdit.boundaryBox.y))
-
-
-proc draw(bxy: Boxy, button: RadioButton, parentEnabled: bool) =
-  if not button.visible:
-    return
-
-  let enabled = parentEnabled and button.enabled
-  if button.bgcolor.isSome():
-    let
-      bgcolor = button.bgcolor.get()
-      color = 
-        if enabled:
-          if button.hovered:
-            bgcolor.hover
-          else:
-            bgcolor.enabled
-        else: bgcolor.disabled
-
-    bxy.drawImage(
-      button.name & "_bg_shape",
-      vec2(button.boundaryBox.x, button.boundaryBox.y),
-      color
-    )
-
-  if button.checked:
-    if button.fgcolor.isSome():
+    let enabled = parentEnabled and label.enabled
+    if label.bgcolor.isSome():
       let
-        fgcolor = button.fgcolor.get()
+        bgcolor = label.bgcolor.get()
         color = 
           if enabled:
-            if button.hovered:
-              fgcolor.hover
-            else:
-              fgcolor.enabled
-          else: fgcolor.disabled
-
-      bxy.drawImage(
-        button.name & "_fg_shape",
-        vec2(button.boundaryBox.x, button.boundaryBox.y),
-        color
-      )
-
-  bxy.drawImage(
-    button.name & "_text",
-    vec2(button.boundaryBox.x, button.boundaryBox.y)
-  )
-
-
-proc draw(bxy: Boxy, button: PushButton, parentEnabled: bool) =
-  if not button.visible:
-    return
-
-  let
-    enabled = parentEnabled and button.enabled
- 
-    y =
-      if not button.pushed:
-        button.boundaryBox.y
-      else:
-        button.boundaryBox.y + 2
-   
-  if button.pushed:
-    button.pushWait += 1
-    if button.pushWait == button.pushWaitMax:
-      button.pushWait = 0
-      button.pushed = false
-
-  case button.shape.kind
-  of pbskCircle:
-    if button.bgcolor.isSome():
-      let
-        bgcolor = button.bgcolor.get()
-        color =
-          if enabled:
-            if button.hovered:
+            if label.hovered:
               bgcolor.hover
             else:
               bgcolor.enabled
-          else:
-            bgcolor.disabled
+          else: bgcolor.disabled
+      bxy.drawRect(label.shape, color)
 
-      bxy.drawImage(
-        button.name,
-        vec2(button.boundaryBox.x, y),
-        color
-      )
+    bxy.drawImage(label.name, vec2(label.boundaryBox.x, label.boundaryBox.y))
 
-  of pbskRect:
+
+  proc draw(bxy: Boxy, lineEdit: LineEdit, parentEnabled: bool) =
+    if not lineEdit.visible:
+      return
+
+    let enabled = parentEnabled and lineEdit.enabled
+    if lineEdit.bgcolor.isSome():
+      let
+        bgcolor = lineEdit.bgcolor.get()
+        color = 
+          if enabled:
+            if lineEdit.hovered:
+              bgcolor.hover
+            else:
+              bgcolor.enabled
+          else: bgcolor.disabled
+      bxy.drawRect(lineEdit.shape, color)
+    
+    if lineEdit.focused:
+      if lineEdit.cursorVisible:
+        bxy.drawRect(lineEdit.cursor.shape, lineEdit.cursor.color)
+
+      lineEdit.cursorWait += 1
+      if lineEdit.cursorWait == lineEdit.cursorWaitMax:
+        lineEdit.cursorWait = 0
+        lineEdit.cursorVisible = not lineEdit.cursorVisible
+
+
+    bxy.drawImage(lineEdit.name, vec2(lineEdit.boundaryBox.x, lineEdit.boundaryBox.y))
+
+
+  proc draw(bxy: Boxy, button: RadioButton, parentEnabled: bool) =
+    if not button.visible:
+      return
+
+    let enabled = parentEnabled and button.enabled
     if button.bgcolor.isSome():
       let
         bgcolor = button.bgcolor.get()
@@ -638,370 +564,458 @@ proc draw(bxy: Boxy, button: PushButton, parentEnabled: bool) =
             else:
               bgcolor.enabled
           else: bgcolor.disabled
-    
-      if button.cornerRadius.isSome():
-        bxy.drawImage(button.name, vec2(button.boundaryBox.x, y), color)
-      else:
-        bxy.drawRect(
-          rect(
-            button.shape.rect.x,
-            y,
-            button.shape.rect.w,
-            button.shape.rect.h
-          ),
+
+      bxy.drawImage(
+        button.name & "_bg_shape",
+        vec2(button.boundaryBox.x, button.boundaryBox.y),
+        color
+      )
+
+    if button.checked:
+      if button.fgcolor.isSome():
+        let
+          fgcolor = button.fgcolor.get()
+          color = 
+            if enabled:
+              if button.hovered:
+                fgcolor.hover
+              else:
+                fgcolor.enabled
+            else: fgcolor.disabled
+
+        bxy.drawImage(
+          button.name & "_fg_shape",
+          vec2(button.boundaryBox.x, button.boundaryBox.y),
           color
         )
 
-  let pos = vec2(button.boundaryBox.x, y)
-  bxy.drawImage(button.name & "_text", pos)
-
-
-proc draw(bxy: Boxy, button: CheckButton, parentEnabled: bool) =
-  if not button.visible:
-    return
-
-  let enabled = parentEnabled and button.enabled
-  if button.bgcolor.isSome():
-    let
-      bgcolor = button.bgcolor.get()
-      color = 
-        if enabled:
-          if button.hovered:
-            bgcolor.hover
-          else:
-            bgcolor.enabled
-        else: bgcolor.disabled
-
     bxy.drawImage(
-      button.name & "_bg_shape",
-      vec2(button.boundaryBox.x, button.boundaryBox.y),
-      color
+      button.name & "_text",
+      vec2(button.boundaryBox.x, button.boundaryBox.y)
     )
 
-  if button.checked:
-    if button.fgcolor.isSome():
+
+  proc draw(bxy: Boxy, button: PushButton, parentEnabled: bool) =
+    if not button.visible:
+      return
+
+    let
+      enabled = parentEnabled and button.enabled
+  
+      y =
+        if not button.pushed:
+          button.boundaryBox.y
+        else:
+          button.boundaryBox.y + 2
+    
+    if button.pushed:
+      button.pushWait += 1
+      if button.pushWait == button.pushWaitMax:
+        button.pushWait = 0
+        button.pushed = false
+
+    case button.shape.kind
+    of pbskCircle:
+      if button.bgcolor.isSome():
+        let
+          bgcolor = button.bgcolor.get()
+          color =
+            if enabled:
+              if button.hovered:
+                bgcolor.hover
+              else:
+                bgcolor.enabled
+            else:
+              bgcolor.disabled
+
+        bxy.drawImage(
+          button.name,
+          vec2(button.boundaryBox.x, y),
+          color
+        )
+
+    of pbskRect:
+      if button.bgcolor.isSome():
+        let
+          bgcolor = button.bgcolor.get()
+          color = 
+            if enabled:
+              if button.hovered:
+                bgcolor.hover
+              else:
+                bgcolor.enabled
+            else: bgcolor.disabled
+      
+        if button.cornerRadius.isSome():
+          bxy.drawImage(button.name, vec2(button.boundaryBox.x, y), color)
+        else:
+          bxy.drawRect(
+            rect(
+              button.shape.rect.x,
+              y,
+              button.shape.rect.w,
+              button.shape.rect.h
+            ),
+            color
+          )
+
+    let pos = vec2(button.boundaryBox.x, y)
+    bxy.drawImage(button.name & "_text", pos)
+
+
+  proc draw(bxy: Boxy, button: CheckButton, parentEnabled: bool) =
+    if not button.visible:
+      return
+
+    let enabled = parentEnabled and button.enabled
+    if button.bgcolor.isSome():
       let
-        fgcolor = button.fgcolor.get()
+        bgcolor = button.bgcolor.get()
         color = 
           if enabled:
             if button.hovered:
+              bgcolor.hover
+            else:
+              bgcolor.enabled
+          else: bgcolor.disabled
+
+      bxy.drawImage(
+        button.name & "_bg_shape",
+        vec2(button.boundaryBox.x, button.boundaryBox.y),
+        color
+      )
+
+    if button.checked:
+      if button.fgcolor.isSome():
+        let
+          fgcolor = button.fgcolor.get()
+          color = 
+            if enabled:
+              if button.hovered:
+                fgcolor.hover
+              else:
+                fgcolor.enabled
+            else: fgcolor.disabled
+
+        bxy.drawImage(
+          button.name & "_fg_shape",
+          vec2(button.boundaryBox.x, button.boundaryBox.y),
+          color
+        )
+
+    bxy.drawImage(
+      button.name & "_text",
+      vec2(button.boundaryBox.x, button.boundaryBox.y)
+    )
+  
+
+  proc draw(bxy: Boxy, slider: Slider, parentEnabled: bool) =
+    if not slider.visible:
+      return
+
+    let enabled = parentEnabled and slider.enabled
+    if slider.bgcolor.isSome():
+      let
+        bgcolor = slider.bgcolor.get()
+        color = 
+          if enabled:
+            if slider.hovered:
+              bgcolor.hover
+            else:
+              bgcolor.enabled
+          else: bgcolor.disabled
+      
+      bxy.drawRect(slider.bgshape, color)
+
+    if slider.fgcolor.isSome():
+      let
+        fgcolor = slider.fgcolor.get()
+        color = 
+          if enabled:
+            if slider.hovered:
               fgcolor.hover
             else:
               fgcolor.enabled
           else: fgcolor.disabled
 
-      bxy.drawImage(
-        button.name & "_fg_shape",
-        vec2(button.boundaryBox.x, button.boundaryBox.y),
+      let
+        offsetx =
+          slider.value /
+          (slider.valueRange[1] - slider.valueRange[0]) *
+          slider.bgshape.w
+
+      bxy.drawRect(
+        rect(
+          slider.fgshape.x + offsetx,
+          slider.fgshape.y,
+          slider.fgshape.w,
+          slider.fgshape.h,
+        ),
         color
       )
 
-  bxy.drawImage(
-    button.name & "_text",
-    vec2(button.boundaryBox.x, button.boundaryBox.y)
-  )
- 
 
-proc draw(bxy: Boxy, slider: Slider, parentEnabled: bool) =
-  if not slider.visible:
-    return
+  proc draw(bxy: Boxy, widget: FlammulinaVelutipesWidget, parentEnabled = true) {.cdecl.}
 
-  let enabled = parentEnabled and slider.enabled
-  if slider.bgcolor.isSome():
+
+  proc draw(bxy: Boxy, layout: Layout, parentEnabled: bool) =
+    if not layout.visible:
+      return
+
+    let enabled = parentEnabled and layout.enabled
+
+    if layout.bgcolor.isSome():
+      let
+        bgcolor = layout.bgcolor.get()
+        color = 
+          if enabled: bgcolor.enabled
+          else: bgcolor.disabled
+      bxy.drawRect(layout.boundaryBox, color)
+
+    let children = layout.children
+    for child in children:
+      bxy.draw(child, enabled)
+
+
+  proc draw(bxy: Boxy, widget: FlammulinaVelutipesWidget, parentEnabled = true) =
+    case widget.kind
+    of wkLayout:
+      bxy.draw(widget.layout, parentEnabled)
+    of wkLabel:
+      bxy.draw(widget.label, parentEnabled)
+    of wkLineEdit:
+      bxy.draw(widget.lineEdit, parentEnabled)
+    of wkRadioButton:
+      bxy.draw(widget.radioButton, parentEnabled)
+    of wkPushButton:
+      bxy.draw(widget.pushButton, parentEnabled)
+    of wkCheckButton:
+      bxy.draw(widget.checkButton, parentEnabled)
+    of wkSlider:
+      bxy.draw(widget.slider, parentEnabled)
+
+
+  proc drawToolTip(
+    bxy: Boxy,
+    tooltip: Tooltip,
+    name: string,
+    mousePos: IVec2,
+    maxSize: IVec2
+  ) =
     let
-      bgcolor = slider.bgcolor.get()
-      color = 
-        if enabled:
-          if slider.hovered:
-            bgcolor.hover
-          else:
-            bgcolor.enabled
-        else: bgcolor.disabled
-    
-    bxy.drawRect(slider.bgshape, color)
-
-  if slider.fgcolor.isSome():
-    let
-      fgcolor = slider.fgcolor.get()
-      color = 
-        if enabled:
-          if slider.hovered:
-            fgcolor.hover
-          else:
-            fgcolor.enabled
-        else: fgcolor.disabled
-
-    let
-      offsetx =
-        slider.value /
-        (slider.valueRange[1] - slider.valueRange[0]) *
-        slider.bgshape.w
+      maxPosition =
+        mousePos +
+        (vec2(tooltip.margin.left, tooltip.margin.top) + tooltip.size).ivec2
+      x =
+        if maxPosition.x > maxSize.x:
+          mousePos.x.float32 - (tooltip.size.x + tooltip.margin.right)
+        else:
+          mousePos.x.float32 + tooltip.margin.left
+      y =
+        if maxPosition.y > maxSize.y:
+          mousePos.y.float32 - (tooltip.size.y + tooltip.margin.bottom)
+        else:
+          mousePos.y.float32 + tooltip.margin.top
 
     bxy.drawRect(
       rect(
-        slider.fgshape.x + offsetx,
-        slider.fgshape.y,
-        slider.fgshape.w,
-        slider.fgshape.h,
+        x = x,
+        y = y,
+        w = tooltip.size.x,
+        h = tooltip.size.y
       ),
-      color
+      tooltip.color
     )
+    bxy.drawImage(name, vec2(x, y))
 
 
-proc draw(bxy: Boxy, widget: FlammulinaVelutipesWidget, parentEnabled = true) {.cdecl.}
+  proc drawToolTip(
+    bxy: Boxy,
+    label: Label,
+    mousePos: IVec2,
+    maxSize: IVec2,
+    parentEnabled = true
+  ) =
+    if
+      parentEnabled and
+      label.visible and
+      label.enabled and
+      label.hovered and
+      label.tooltip.isSome():
+
+      let tooltip = label.tooltip.get()
+      bxy.drawToolTip(tooltip, label.name & "_tooltip", mousePos, maxSize)
 
 
-proc draw(bxy: Boxy, layout: Layout, parentEnabled: bool) =
-  if not layout.visible:
-    return
+  proc drawToolTip(
+    bxy: Boxy,
+    lineEdit: LineEdit,
+    mousePos: IVec2,
+    maxSize: IVec2,
+    parentEnabled = true
+  ) =
+    if
+      parentEnabled and
+      lineEdit.visible and
+      lineEdit.enabled and
+      lineEdit.hovered and
+      lineEdit.tooltip.isSome():
 
-  let enabled = parentEnabled and layout.enabled
-
-  if layout.bgcolor.isSome():
-    let
-      bgcolor = layout.bgcolor.get()
-      color = 
-        if enabled: bgcolor.enabled
-        else: bgcolor.disabled
-    bxy.drawRect(layout.boundaryBox, color)
-
-  let children = layout.children
-  for child in children:
-    bxy.draw(child, enabled)
-
-
-proc draw(bxy: Boxy, widget: FlammulinaVelutipesWidget, parentEnabled = true) =
-  case widget.kind
-  of wkLayout:
-    bxy.draw(widget.layout, parentEnabled)
-  of wkLabel:
-    bxy.draw(widget.label, parentEnabled)
-  of wkLineEdit:
-    bxy.draw(widget.lineEdit, parentEnabled)
-  of wkRadioButton:
-    bxy.draw(widget.radioButton, parentEnabled)
-  of wkPushButton:
-    bxy.draw(widget.pushButton, parentEnabled)
-  of wkCheckButton:
-    bxy.draw(widget.checkButton, parentEnabled)
-  of wkSlider:
-    bxy.draw(widget.slider, parentEnabled)
+      let tooltip = lineEdit.tooltip.get()
+      bxy.drawToolTip(tooltip, lineEdit.name & "_tooltip", mousePos, maxSize)
 
 
-proc drawToolTip(
-  bxy: Boxy,
-  tooltip: Tooltip,
-  name: string,
-  mousePos: IVec2,
-  maxSize: IVec2
-) =
-  let
-    maxPosition =
-      mousePos +
-      (vec2(tooltip.margin.left, tooltip.margin.top) + tooltip.size).ivec2
-    x =
-      if maxPosition.x > maxSize.x:
-        mousePos.x.float32 - (tooltip.size.x + tooltip.margin.right)
-      else:
-        mousePos.x.float32 + tooltip.margin.left
-    y =
-      if maxPosition.y > maxSize.y:
-        mousePos.y.float32 - (tooltip.size.y + tooltip.margin.bottom)
-      else:
-        mousePos.y.float32 + tooltip.margin.top
+  proc drawToolTip(
+    bxy: Boxy,
+    button: RadioButton,
+    mousePos: IVec2,
+    maxSize: IVec2,
+    parentEnabled = true
+  ) =
+    if 
+      parentEnabled and
+      button.visible and
+      button.enabled and
+      button.hovered and
+      button.tooltip.isSome():
 
-  bxy.drawRect(
-    rect(
-      x = x,
-      y = y,
-      w = tooltip.size.x,
-      h = tooltip.size.y
-    ),
-    tooltip.color
-  )
-  bxy.drawImage(name, vec2(x, y))
+      let tooltip = button.tooltip.get()
+      bxy.drawToolTip(tooltip, button.name & "_tooltip", mousePos, maxSize)
 
 
-proc drawToolTip(
-  bxy: Boxy,
-  label: Label,
-  mousePos: IVec2,
-  maxSize: IVec2,
-  parentEnabled = true
-) =
-  if
-    parentEnabled and
-    label.visible and
-    label.enabled and
-    label.hovered and
-    label.tooltip.isSome():
+  proc drawToolTip(
+    bxy: Boxy,
+    button: PushButton,
+    mousePos: IVec2,
+    maxSize: IVec2,
+    parentEnabled = true
+  ) =
+    if 
+      parentEnabled and
+      button.visible and
+      button.enabled and
+      button.hovered and
+      button.tooltip.isSome():
 
-    let tooltip = label.tooltip.get()
-    bxy.drawToolTip(tooltip, label.name & "_tooltip", mousePos, maxSize)
-
-
-proc drawToolTip(
-  bxy: Boxy,
-  lineEdit: LineEdit,
-  mousePos: IVec2,
-  maxSize: IVec2,
-  parentEnabled = true
-) =
-  if
-    parentEnabled and
-    lineEdit.visible and
-    lineEdit.enabled and
-    lineEdit.hovered and
-    lineEdit.tooltip.isSome():
-
-    let tooltip = lineEdit.tooltip.get()
-    bxy.drawToolTip(tooltip, lineEdit.name & "_tooltip", mousePos, maxSize)
+      let tooltip = button.tooltip.get()
+      bxy.drawToolTip(tooltip, button.name & "_tooltip", mousePos, maxSize)
 
 
-proc drawToolTip(
-  bxy: Boxy,
-  button: RadioButton,
-  mousePos: IVec2,
-  maxSize: IVec2,
-  parentEnabled = true
-) =
-  if 
-    parentEnabled and
-    button.visible and
-    button.enabled and
-    button.hovered and
-    button.tooltip.isSome():
+  proc drawToolTip(
+    bxy: Boxy,
+    button: CheckButton,
+    mousePos: IVec2,
+    maxSize: IVec2,
+    parentEnabled = true
+  ) =
+    if 
+      parentEnabled and
+      button.visible and
+      button.enabled and
+      button.hovered and
+      button.tooltip.isSome():
 
-    let tooltip = button.tooltip.get()
-    bxy.drawToolTip(tooltip, button.name & "_tooltip", mousePos, maxSize)
-
-
-proc drawToolTip(
-  bxy: Boxy,
-  button: PushButton,
-  mousePos: IVec2,
-  maxSize: IVec2,
-  parentEnabled = true
-) =
-  if 
-    parentEnabled and
-    button.visible and
-    button.enabled and
-    button.hovered and
-    button.tooltip.isSome():
-
-    let tooltip = button.tooltip.get()
-    bxy.drawToolTip(tooltip, button.name & "_tooltip", mousePos, maxSize)
+      let tooltip = button.tooltip.get()
+      bxy.drawToolTip(tooltip, button.name & "_tooltip", mousePos, maxSize)
 
 
-proc drawToolTip(
-  bxy: Boxy,
-  button: CheckButton,
-  mousePos: IVec2,
-  maxSize: IVec2,
-  parentEnabled = true
-) =
-  if 
-    parentEnabled and
-    button.visible and
-    button.enabled and
-    button.hovered and
-    button.tooltip.isSome():
+  proc drawToolTip(
+    bxy: Boxy,
+    layout: Layout,
+    mousePos: IVec2,
+    maxSize: IVec2,
+    parentEnabled = true
+  ) =
+    if not layout.visible:
+      return
 
-    let tooltip = button.tooltip.get()
-    bxy.drawToolTip(tooltip, button.name & "_tooltip", mousePos, maxSize)
+    let enabled = parentEnabled and layout.enabled
+    if not enabled:
+      return
+
+    # if not layout.hovered:
+    #   return
+
+    let children = layout.children
+    for child in children:
+      case child.kind
+      of wkLayout:
+        bxy.drawToolTip(child.layout, mousePos, maxSize, enabled)
+      of wkLabel:
+        bxy.drawToolTip(child.label, mousePos, maxSize, enabled)
+      of wkLineEdit:
+        bxy.drawToolTip(child.lineEdit, mousePos, maxSize, enabled)
+      of wkRadioButton:
+        bxy.drawToolTip(child.radioButton, mousePos, maxSize, enabled)
+      of wkPushButton:
+        bxy.drawToolTip(child.pushButton, mousePos, maxSize, enabled)
+      of wkCheckButton:
+        bxy.drawToolTip(child.checkButton, mousePos, maxSize, enabled)
+      of wkSlider:
+        discard
 
 
-proc drawToolTip(
-  bxy: Boxy,
-  layout: Layout,
-  mousePos: IVec2,
-  maxSize: IVec2,
-  parentEnabled = true
-) =
-  if not layout.visible:
-    return
-
-  let enabled = parentEnabled and layout.enabled
-  if not enabled:
-    return
-
-  # if not layout.hovered:
-  #   return
-
-  let children = layout.children
-  for child in children:
-    case child.kind
+  proc drawToolTip(
+    bxy: Boxy,
+    widget: FlammulinaVelutipesWidget,
+    mousePos: IVec2,
+    maxSize: IVec2,
+    parentEnabled = true
+  ) =
+    case widget.kind
     of wkLayout:
-      bxy.drawToolTip(child.layout, mousePos, maxSize, enabled)
+      bxy.drawToolTip(widget.layout, mousePos, maxSize, parentEnabled)
     of wkLabel:
-      bxy.drawToolTip(child.label, mousePos, maxSize, enabled)
+      bxy.drawToolTip(widget.label, mousePos, maxSize, parentEnabled)
     of wkLineEdit:
-      bxy.drawToolTip(child.lineEdit, mousePos, maxSize, enabled)
+      bxy.drawToolTip(widget.lineEdit, mousePos, maxSize, parentEnabled)
     of wkRadioButton:
-      bxy.drawToolTip(child.radioButton, mousePos, maxSize, enabled)
+      bxy.drawToolTip(widget.radioButton, mousePos, maxSize, parentEnabled)
     of wkPushButton:
-      bxy.drawToolTip(child.pushButton, mousePos, maxSize, enabled)
+      bxy.drawToolTip(widget.pushButton, mousePos, maxSize, parentEnabled)
     of wkCheckButton:
-      bxy.drawToolTip(child.checkButton, mousePos, maxSize, enabled)
+      bxy.drawToolTip(widget.checkButton, mousePos, maxSize, parentEnabled)
     of wkSlider:
       discard
 
 
-proc drawToolTip(
-  bxy: Boxy,
-  widget: FlammulinaVelutipesWidget,
-  mousePos: IVec2,
-  maxSize: IVec2,
-  parentEnabled = true
-) =
-  case widget.kind
-  of wkLayout:
-    bxy.drawToolTip(widget.layout, mousePos, maxSize, parentEnabled)
-  of wkLabel:
-    bxy.drawToolTip(widget.label, mousePos, maxSize, parentEnabled)
-  of wkLineEdit:
-    bxy.drawToolTip(widget.lineEdit, mousePos, maxSize, parentEnabled)
-  of wkRadioButton:
-    bxy.drawToolTip(widget.radioButton, mousePos, maxSize, parentEnabled)
-  of wkPushButton:
-    bxy.drawToolTip(widget.pushButton, mousePos, maxSize, parentEnabled)
-  of wkCheckButton:
-    bxy.drawToolTip(widget.checkButton, mousePos, maxSize, parentEnabled)
-  of wkSlider:
-    discard
+  # Called when it is time to draw a new frame.
+  proc display(
+    window: Window,
+    bxy: Boxy,
+    rootWidget: FlammulinaVelutipesWidget,
+    frame: int
+  ) =
+    let mousePos = window.mousePos()
+
+    # Clear the screen and begin a new frame.
+    bxy.beginFrame(window.size)
+
+    # Draw the rings.
+    # let center = windowSize.vec2 / 2
+    # bxy.drawImage("ring1", center, angle = frame.float / 100)
+    # bxy.drawImage("ring2", center, angle = -frame.float / 190)
+    # bxy.drawImage("ring3", center, angle = frame.float / 170)
+
+    bxy.draw(rootWidget)
+    bxy.drawToolTip(rootWidget, mousePos, window.size)
+
+    # End this frame, flushing the draw commands.
+    bxy.endFrame()
+
+    # Swap buffers displaying the new Boxy frame.
+    window.swapBuffers()
 
 
-# Called when it is time to draw a new frame.
-proc display(
-  window: Window,
-  bxy: Boxy,
-  rootWidget: FlammulinaVelutipesWidget,
-  frame: int
-) =
-  let mousePos = window.mousePos()
+  # proc display*(self: WindowManager, frame: int) =
+  #   display(self.window, self.boxy, self.rootWidget, frame)
 
-  # Clear the screen and begin a new frame.
-  bxy.beginFrame(window.size)
-
-  # Draw the rings.
-  # let center = windowSize.vec2 / 2
-  # bxy.drawImage("ring1", center, angle = frame.float / 100)
-  # bxy.drawImage("ring2", center, angle = -frame.float / 190)
-  # bxy.drawImage("ring3", center, angle = frame.float / 170)
-
-  bxy.draw(rootWidget)
-  bxy.drawToolTip(rootWidget, mousePos, window.size)
-
-  # End this frame, flushing the draw commands.
-  bxy.endFrame()
-
-  # Swap buffers displaying the new Boxy frame.
-  window.swapBuffers()
-
-
-proc display*(self: WindowManager, frame: int) =
-  display(self.window, self.boxy, self.rootWidget, frame)
+  display(
+    windowManager.window,
+    windowManager.boxy,
+    windowManager.rootWidget,
+    frame
+  )
 
 
 proc main(): cint =
@@ -1289,7 +1303,7 @@ proc main(): cint =
 
   windowManager.window.onFrame = proc() =
     windowManager.updateImage()
-    windowManager.display(frame)
+    windowManager.display()
 
   testButtonLeft.pushButton.onClicked = proc() =
     testLabelLeftBottom.setVisible(not testLabelLeftBottom.visible())
