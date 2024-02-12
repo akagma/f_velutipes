@@ -52,7 +52,9 @@ const
   defaultCursorWait = 30
 
 
-var defaultFont = readFont("examples/data/Roboto-Regular_1.ttf")
+var defaultFont* = readFont(
+  "static/font/Noto_Sans_JP/static/NotoSansJP-Regular.ttf"
+)
 defaultFont.size = 24
 defaultFont.paint = parseHtmlColor(gofun_iro)
 
