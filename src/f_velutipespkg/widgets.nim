@@ -1701,14 +1701,6 @@ proc setBoundaryBox(self: var Layout, x, y: float32) =
 
   var children = self.children 
 
-  if self.horizontalSizeState == WidgetSizeState.Minimum:
-    for i in 0..<self.children.len:
-      children[i].setHorizontalSizeState(WidgetSizeState.Minimum)
-
-  if self.verticalSizeState == WidgetSizeState.Minimum:
-    for i in 0..<self.children.len:
-      children[i].setVerticalSizeState(WidgetSizeState.Minimum)
-
   case self.direction
   of LayoutDirection.Horizontal:
     var
