@@ -1,6 +1,9 @@
-import std/options
-import std/sequtils
-import std/sugar
+import std/[
+  macros,
+  options,
+  sequtils,
+  sugar
+]
 
 import boxy
 import bumpy
@@ -245,6 +248,84 @@ proc getBoundaryBox(self: FlammulinaVelutipesWidget): Rect =
     self.checkButton.boundaryBox
   of wkSlider:
     self.slider.boundaryBox
+
+
+func getHorizontalSizeState(self: FlammulinaVelutipesWidget): WidgetSizeState =
+  case self.kind:
+  of wkLayout:
+    self.layout.horizontalSizeState
+  of wkLabel:
+    self.label.horizontalSizeState
+  of wkLineEdit:
+    self.lineEdit.horizontalSizeState
+  of wkRadioButton:
+    self.radioButton.horizontalSizeState
+  of wkPushButton:
+    self.pushButton.horizontalSizeState
+  of wkCheckButton:
+    self.checkButton.horizontalSizeState
+  of wkSlider:
+    self.slider.horizontalSizeState
+
+
+proc setHorizontalSizeState(
+  self: var FlammulinaVelutipesWidget,
+  horizontalSizeState: WidgetSizeState
+) =
+  case self.kind:
+  of wkLayout:
+    self.layout.horizontalSizeState = horizontalSizeState
+  of wkLabel:
+    self.label.horizontalSizeState = horizontalSizeState
+  of wkLineEdit:
+    self.lineEdit.horizontalSizeState = horizontalSizeState
+  of wkRadioButton:
+    self.radioButton.horizontalSizeState = horizontalSizeState
+  of wkPushButton:
+    self.pushButton.horizontalSizeState = horizontalSizeState
+  of wkCheckButton:
+    self.checkButton.horizontalSizeState = horizontalSizeState
+  of wkSlider:
+    self.slider.horizontalSizeState = horizontalSizeState
+
+
+func getVerticalSizeState(self: FlammulinaVelutipesWidget): WidgetSizeState =
+  case self.kind:
+  of wkLayout:
+    self.layout.verticalSizeState
+  of wkLabel:
+    self.label.verticalSizeState
+  of wkLineEdit:
+    self.lineEdit.verticalSizeState
+  of wkRadioButton:
+    self.radioButton.verticalSizeState
+  of wkPushButton:
+    self.pushButton.verticalSizeState
+  of wkCheckButton:
+    self.checkButton.verticalSizeState
+  of wkSlider:
+    self.slider.verticalSizeState
+
+
+func setVerticalSizeState(
+  self: FlammulinaVelutipesWidget,
+  verticalSizeState: WidgetSizeState
+) =
+  case self.kind:
+  of wkLayout:
+    self.layout.verticalSizeState = verticalSizeState
+  of wkLabel:
+    self.label.verticalSizeState = verticalSizeState
+  of wkLineEdit:
+    self.lineEdit.verticalSizeState = verticalSizeState
+  of wkRadioButton:
+    self.radioButton.verticalSizeState = verticalSizeState
+  of wkPushButton:
+    self.pushButton.verticalSizeState = verticalSizeState
+  of wkCheckButton:
+    self.checkButton.verticalSizeState = verticalSizeState
+  of wkSlider:
+    self.slider.verticalSizeState = verticalSizeState
 
 
 func getMinSize(text: string, font: Font, size: Vec2, padding: Padding): Vec2 =
@@ -1618,6 +1699,16 @@ proc setBoundaryBox(self: var Layout, x, y: float32) =
   if not self.visible:
     return
 
+  var children = self.children 
+
+  if self.horizontalSizeState == WidgetSizeState.Minimum:
+    for i in 0..<self.children.len:
+      children[i].setHorizontalSizeState(WidgetSizeState.Minimum)
+
+  if self.verticalSizeState == WidgetSizeState.Minimum:
+    for i in 0..<self.children.len:
+      children[i].setVerticalSizeState(WidgetSizeState.Minimum)
+
   case self.direction
   of LayoutDirection.Horizontal:
     var
@@ -1627,7 +1718,6 @@ proc setBoundaryBox(self: var Layout, x, y: float32) =
 
     let childy = y + self.padding.top
 
-    var children = self.children 
     for i in 0..<children.len:
       if not children[i].visible():
         continue
@@ -1662,7 +1752,6 @@ proc setBoundaryBox(self: var Layout, x, y: float32) =
 
     let childx = x + self.padding.left
 
-    var children = self.children 
     for i in 0..<children.len:
       if not children[i].visible():
         continue
@@ -1713,6 +1802,66 @@ proc setBoundaryBox*(self: var FlammulinaVelutipesWidget, x, y: float32) =
 
 proc setAlignment(self: var Layout, x, y, width, height: float32) =
   var children = self.children
+  let
+    blancWidth =
+      if self.children.len > 0:
+        width - self.padding.left - self.padding.right - children.map(
+          child => (
+            if child.visible():
+              child.getMarginLeft() + child.getBoundaryBoxWidth() + child.getMarginRight()
+            else:
+              0.0
+          )
+        ).foldl(a + b)
+      else:
+        0.0
+
+    blancHeight =
+      if self.children.len > 0:
+        height - self.padding.left - self.padding.right - children.map(
+          child => (
+            if child.visible():
+              child.getMarginTop() + child.getBoundaryBoxHeight() + child.getMarginBottom()
+            else:
+              0.0
+          )
+        ).foldl(a + b)
+      else:
+        0.0
+    
+    expandHorizontalChildNum =
+      if self.children.len > 0:
+        children.map(
+          child => (
+            if child.visible():
+              case child.getHorizontalSizeState()
+              of WidgetSizeState.Expand: 1
+              else: 0
+            else: 0
+          )
+        ).foldl(a + b)
+      else: 0
+ 
+    expandVerticalChildNum =
+      if self.children.len > 0:
+        children.map(
+          child => (
+            if child.visible():
+              case child.getVerticalSizeState()
+              of WidgetSizeState.Expand: 1
+              else: 0
+            else: 0
+          )
+        ).foldl(a + b)
+      else: 0
+    
+    expandWidthPerChild =
+      if expandHorizontalChildNum == 0: 0.0
+      else: blancWidth / expandHorizontalChildNum.float32
+ 
+    expandHeightPerChild =
+      if expandVerticalChildNum == 0: 0.0
+      else: blancHeight / expandVerticalChildNum.float32
 
   case self.direction
   of LayoutDirection.Horizontal:
@@ -1730,7 +1879,13 @@ proc setAlignment(self: var Layout, x, y, width, height: float32) =
         of wkLayout:
           let
             childWidth =
-              children[i].getBoundaryBoxWidth()
+              case children[i].layout.horizontalSizeState
+              of WidgetSizeState.Fixed:
+                children[i].getBoundaryBoxWidth()
+              of WidgetSizeState.Minimum:
+                children[i].getBoundaryBoxWidth()
+              of WidgetSizeState.Expand:
+                children[i].getBoundaryBoxWidth() + expandWidthPerChild
 
             childHeight =
               case children[i].layout.verticalSizeState
@@ -1740,8 +1895,9 @@ proc setAlignment(self: var Layout, x, y, width, height: float32) =
                 children[i].getBoundaryBoxHeight()
               of WidgetSizeState.Expand:
                 if children[i].layout.parent.isSome():
-                  let parent = children[i].layout.parent.get()
-                  parent.getBoundaryBoxHeight() -
+                  # let parent = children[i].layout.parent.get()
+                  # parent.getBoundaryBoxHeight() -
+                  height -
                   children[i].getMarginTop() -
                   children[i].getMarginBottom()
                 else:
@@ -1768,7 +1924,7 @@ proc setAlignment(self: var Layout, x, y, width, height: float32) =
 
       let selfWidth =
         case self.horizontalSizeState
-        of Minimum:
+        of WidgetSizeState.Minimum:
           childx + self.padding.right - x
         else:
           width
@@ -1791,7 +1947,13 @@ proc setAlignment(self: var Layout, x, y, width, height: float32) =
         of wkLayout:
           let
             childWidth =
-              children[i].getBoundaryBoxWidth()
+              case children[i].layout.horizontalSizeState
+              of WidgetSizeState.Fixed:
+                children[i].getBoundaryBoxWidth()
+              of WidgetSizeState.Minimum:
+                children[i].getBoundaryBoxWidth()
+              of WidgetSizeState.Expand:
+                children[i].getBoundaryBoxWidth() + expandWidthPerChild
 
             childHeight =
               case children[i].layout.verticalSizeState
@@ -1852,7 +2014,13 @@ proc setAlignment(self: var Layout, x, y, width, height: float32) =
         of wkLayout:
           let
             childWidth =
-              children[i].getBoundaryBoxWidth()
+              case children[i].layout.horizontalSizeState
+              of WidgetSizeState.Fixed:
+                children[i].getBoundaryBoxWidth()
+              of WidgetSizeState.Minimum:
+                children[i].getBoundaryBoxWidth()
+              of WidgetSizeState.Expand:
+                children[i].getBoundaryBoxWidth() + expandWidthPerChild
 
             childHeight =
               case children[i].layout.verticalSizeState
@@ -1942,7 +2110,13 @@ proc setAlignment(self: var Layout, x, y, width, height: float32) =
                   children[i].getBoundaryBoxWidth()
 
             childHeight =
-              children[i].getBoundaryBoxHeight()
+              case children[i].layout.verticalSizeState
+              of WidgetSizeState.Fixed:
+                children[i].getBoundaryBoxHeight()
+              of WidgetSizeState.Minimum:
+                children[i].getBoundaryBoxHeight()
+              of WidgetSizeState.Expand:
+                children[i].getBoundaryBoxHeight() + expandHeightPerChild
 
             childx = x + self.padding.left + children[i].getMarginLeft()
 
@@ -2003,7 +2177,13 @@ proc setAlignment(self: var Layout, x, y, width, height: float32) =
                   children[i].getBoundaryBoxWidth()
 
             childHeight =
-              children[i].getBoundaryBoxHeight()
+              case children[i].layout.verticalSizeState
+              of WidgetSizeState.Fixed:
+                children[i].getBoundaryBoxHeight()
+              of WidgetSizeState.Minimum:
+                children[i].getBoundaryBoxHeight()
+              of WidgetSizeState.Expand:
+                children[i].getBoundaryBoxHeight() + expandHeightPerChild
 
             childx = x + (width - childWidth) / 2
 
@@ -2064,7 +2244,13 @@ proc setAlignment(self: var Layout, x, y, width, height: float32) =
                   children[i].getBoundaryBoxWidth()
 
             childHeight =
-              children[i].getBoundaryBoxHeight()
+              case children[i].layout.verticalSizeState
+              of WidgetSizeState.Fixed:
+                children[i].getBoundaryBoxHeight()
+              of WidgetSizeState.Minimum:
+                children[i].getBoundaryBoxHeight()
+              of WidgetSizeState.Expand:
+                children[i].getBoundaryBoxHeight() + expandHeightPerChild
 
             childx =
               x +
